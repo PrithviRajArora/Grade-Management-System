@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JLU Marks — Demo Walkthrough</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Literata:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --surface2: #f4f3ef;
+  --border: #e2e0d8;
+  --border2: #ccc9be;
+  --text: #1a1916;
+  --text2: #5c594f;
+  --text3: #9c9888;
+  --accent: #1a472a;
+  --accent-light: #e8f0ea;
+  --accent2: #2d6a4f;
+  --amber: #92400e;
+  --amber-light: #fef3c7;
+  --red: #9b1c1c;
+  --red-light: #fde8e8;
+  --blue: #1e3a8a;
+  --blue-light: #eff6ff;
+  --purple: #4c1d95;
+  --purple-light: #f5f3ff;
+  --mono: 'IBM Plex Mono', monospace;
+  --serif: 'Literata', Georgia, serif;
+  --radius: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--serif); font-size: 15px; line-height: 1.7; }
+
+/* ── LAYOUT ── */
+.shell { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+.sidebar { background: var(--text); position: fixed; height: 100vh; width: 280px; overflow-y: auto; padding: 24px 0; }
+.main { margin-left: 280px; padding: 48px 56px; max-width: 860px; }
+
+/* ── SIDEBAR ── */
+.logo { padding: 0 24px 24px; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 16px; }
+.logo-title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: #fff; letter-spacing: .04em; }
+.logo-sub { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 2px; }
+.progress-summary { padding: 12px 24px; margin-bottom: 8px; }
+.prog-bar-outer { height: 3px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+.prog-bar-inner { height: 100%; background: #4ade80; border-radius: 2px; transition: width .4s; }
+.prog-text { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.4); }
+
+.phase-group { margin-bottom: 4px; }
+.phase-header {
+  padding: 8px 24px; font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3);
+  cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+}
+.phase-header:hover { color: rgba(255,255,255,.6); }
+.phase-chevron { transition: transform .2s; }
+.phase-header.open .phase-chevron { transform: rotate(90deg); }
+.phase-steps { overflow: hidden; }
+
+.step-link {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 7px 24px; cursor: pointer; transition: background .12s;
+  border-left: 2px solid transparent;
+}
+.step-link:hover { background: rgba(255,255,255,.05); }
+.step-link.active { background: rgba(255,255,255,.08); border-left-color: #4ade80; }
+.step-link.done .step-num { background: #4ade80; color: #1a1916; border-color: #4ade80; }
+.step-num {
+  width: 20px; height: 20px; border-radius: 50%; border: 1px solid rgba(255,255,255,.2);
+  font-family: var(--mono); font-size: 10px; font-weight: 600; color: rgba(255,255,255,.4);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+  transition: all .2s;
+}
+.step-text { font-size: 12px; color: rgba(255,255,255,.55); line-height: 1.4; }
+.step-link.active .step-text { color: rgba(255,255,255,.9); }
+
+/* ── MAIN ── */
+.phase-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+  border-radius: 20px; font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: .05em; text-transform: uppercase; margin-bottom: 12px;
+}
+.badge-admin { background: var(--purple-light); color: var(--purple); }
+.badge-faculty { background: var(--accent-light); color: var(--accent); }
+.badge-student { background: var(--amber-light); color: var(--amber); }
+.badge-system { background: var(--blue-light); color: var(--blue); }
+
+.step-title { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 6px; line-height: 1.3; }
+.step-subtitle { font-size: 15px; color: var(--text2); margin-bottom: 28px; font-style: italic; }
+
+/* ── ACTION CARDS ── */
+.action-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: 14px; overflow: hidden;
+}
+.action-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px; cursor: pointer; user-select: none;
+  transition: background .12s;
+}
+.action-header:hover { background: var(--surface2); }
+.action-checkbox {
+  width: 22px; height: 22px; border: 1.5px solid var(--border2); border-radius: 5px;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: all .2s; cursor: pointer;
+}
+.action-checkbox.checked { background: var(--accent); border-color: var(--accent); }
+.action-checkbox.checked::after { content: '✓'; color: #fff; font-size: 13px; font-weight: 700; }
+.action-label { font-weight: 600; font-size: 14px; color: var(--text); flex: 1; }
+.action-nav { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.action-body { padding: 0 18px 16px 54px; display: none; }
+.action-body.open { display: block; }
+
+/* ── FIELD BLOCKS ── */
+.fields { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+.field-row { display: flex; align-items: baseline; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+.field-row:last-child { border-bottom: none; }
+.field-label { font-family: var(--mono); font-size: 11px; color: var(--text3); min-width: 120px; flex-shrink: 0; }
+.field-value { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text); }
+.field-note { font-size: 12px; color: var(--text3); font-style: italic; }
+
+/* ── CALLOUTS ── */
+.callout { border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 14px; line-height: 1.6; }
+.callout-tip { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent); }
+.callout-warn { background: var(--amber-light); border-left: 3px solid var(--amber); color: var(--amber); }
+.callout-info { background: var(--blue-light); border-left: 3px solid var(--blue); color: var(--blue); }
+.callout-expect { background: var(--purple-light); border-left: 3px solid var(--purple); color: var(--purple); }
+.callout strong { font-weight: 600; }
+
+.tag { display: inline-block; padding: 1px 8px; border-radius: 4px; font-family: var(--mono); font-size: 12px; font-weight: 600; margin: 0 2px; }
+.tag-page { background: #1a1916; color: #e2e0d8; }
+.tag-click { background: var(--accent-light); color: var(--accent); border: 1px solid #c3d9c8; }
+.tag-type { background: var(--blue-light); color: var(--blue); border: 1px solid #bfdbfe; }
+.tag-result { background: var(--amber-light); color: var(--amber); border: 1px solid #fde68a; }
+
+p { margin-bottom: 10px; }
+.desc { font-size: 14px; color: var(--text2); margin-bottom: 16px; }
+
+/* ── NAV BUTTONS ── */
+.nav-row { display: flex; align-items: center; justify-content: space-between; margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--border); }
+.nav-btn {
+  display: flex; align-items: center; gap: 8px; padding: 10px 18px;
+  border: 1.5px solid var(--border2); border-radius: var(--radius);
+  background: var(--surface); color: var(--text2); font-family: var(--mono);
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; text-decoration: none;
+}
+.nav-btn:hover { border-color: var(--text); color: var(--text); }
+.nav-btn.primary { background: var(--text); color: #fff; border-color: var(--text); }
+.nav-btn.primary:hover { background: var(--accent); border-color: var(--accent); }
+
+/* ── STEP COUNTER ── */
+.step-counter { font-family: var(--mono); font-size: 12px; color: var(--text3); }
+
+/* ── SECTION DIVIDER ── */
+.section-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
+.section-divider hr { flex: 1; border: none; border-top: 1px solid var(--border); }
+.section-divider span { font-family: var(--mono); font-size: 11px; color: var(--text3); white-space: nowrap; }
+
+/* ── CREDENTIALS BOX ── */
+.creds { display: inline-flex; align-items: center; gap: 16px; background: #1a1916; color: #e2e0d8; padding: 10px 18px; border-radius: 8px; font-family: var(--mono); font-size: 13px; margin: 10px 0; }
+.creds span { color: #6ee7b7; font-weight: 600; }
+
+/* ── DONE OVERLAY ── */
+.step-done-badge { display: none; font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 600; margin-left: 8px; }
+.step-link.done .step-done-badge { display: inline; }
+
+/* ── FINISH SCREEN ── */
+.finish { text-align: center; padding: 60px 0; }
+.finish-emoji { font-size: 56px; margin-bottom: 20px; }
+.finish-title { font-family: var(--mono); font-size: 28px; font-weight: 600; margin-bottom: 12px; }
+.finish-desc { font-size: 16px; color: var(--text2); max-width: 480px; margin: 0 auto; }
+
+/* ── SCROLLBAR ── */
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav class="sidebar">
+  <div class="logo">
+    <div class="logo-title">JLU Marks</div>
+    <div class="logo-sub">Demo Walkthrough Guide</div>
+  </div>
+  <div class="progress-summary">
+    <div class="prog-bar-outer"><div class="prog-bar-inner" id="prog-bar" style="width:0%"></div></div>
+    <div class="prog-text" id="prog-text">0 / 24 steps done</div>
+  </div>
+
+  <div id="nav-tree"></div>
+</nav>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main class="main" id="main-content"></main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════
+const PHASES = [
+  { id:'setup', label:'System Setup', role:'admin', steps:[
+    { id:'login-admin', title:'Login as Admin', subtitle:'Getting into the system for the first time', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Open your browser to localhost:3000', nav:'/', body:`<p>Make sure your Vite dev server is running (<code>npm run dev</code>) and the Django backend is up on port 8000.</p>
+          <div class="creds">JLU ID: <span>JLU001</span> &nbsp;·&nbsp; Password: <span>your admin password</span></div>
+          <div class="callout callout-tip">💡 The role you get is determined server-side from the <code>role</code> field in the Users table, not what you type here.</div>` },
+        { label:'Sign in and land on the Dashboard', nav:'/', body:`<p>After login you should see the <strong>Admin Dashboard</strong> with stat cards: Total Students, Faculty Members, Active Courses, Total Enrolments, Marks Pending, ESE Pending, Results Complete, Active Backlogs.</p>
+          <div class="callout callout-expect">✦ Expected: All numbers are likely 0 or very small since the system is fresh. That's fine — we're about to build it all up.</div>` }
+      ]
+    },
+    { id:'school', title:'Create a School', subtitle:'The top level of the org hierarchy', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Navigate to Admin Panel', nav:'/admin', body:`<p>Click <span class="tag tag-page">Admin Panel</span> in the sidebar. You'll see tabs for Schools, Programs, Faculty, and Faculty-Of assignments.</p>` },
+        { label:'Create a School', nav:'/admin', body:`<p>Click <span class="tag tag-click">+ Add School</span> and fill in:</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">name</span><span class="field-value">School of Engineering & Technology</span></div>
+            <div class="field-row"><span class="field-label">short_name</span><span class="field-value">SET</span></div>
+          </div>
+          <div class="callout callout-tip">💡 Short name is used in report headers. Keep it under 10 chars.</div>` }
+      ]
+    },
+    { id:'program', title:'Create a Program', subtitle:'B.Tech CSE under the school', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Add a Program under SET', nav:'/admin', body:`<p>Still in Admin Panel. Click <span class="tag tag-click">+ Add Program</span>:</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">school</span><span class="field-value">SET (the one we just made)</span></div>
+            <div class="field-row"><span class="field-label">name</span><span class="field-value">B.Tech Computer Science & Engineering</span></div>
+            <div class="field-row"><span class="field-label">short_name</span><span class="field-value">BTCSE</span></div>
+            <div class="field-row"><span class="field-label">duration_yrs</span><span class="field-value">4</span></div>
+          </div>` }
+      ]
+    },
+    { id:'faculty-create', title:'Create a Faculty Account', subtitle:'The person who will teach and enter marks', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Go to Admin Panel → Faculty tab', nav:'/admin', body:`<p>Click the <strong>Faculty</strong> section. Click <span class="tag tag-click">+ Add Faculty</span>.</p>` },
+        { label:'Fill in faculty details', nav:'/admin', body:`
+          <div class="fields">
+            <div class="field-row"><span class="field-label">faculty_id</span><span class="field-value">F001</span><span class="field-note">(or click "Next ID" to auto-generate)</span></div>
+            <div class="field-row"><span class="field-label">name</span><span class="field-value">Dr. Meena Gupta</span></div>
+            <div class="field-row"><span class="field-label">school</span><span class="field-value">SET</span></div>
+            <div class="field-row"><span class="field-label">department</span><span class="field-value">Computer Science</span></div>
+            <div class="field-row"><span class="field-label">jlu_id</span><span class="field-value">JLU042</span><span class="field-note">(this is their login username)</span></div>
+            <div class="field-row"><span class="field-label">password</span><span class="field-value">faculty123</span></div>
+          </div>
+          <div class="callout callout-warn">⚠ Write down the JLU ID and password — you'll need them to log in as faculty later.</div>` }
+      ]
+    },
+    { id:'students-create', title:'Create Students', subtitle:'The people who will be enrolled and graded', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Go to Students page', nav:'/students', body:`<p>Click <span class="tag tag-page">Students</span> in the sidebar. Click <span class="tag tag-click">+ Add Student</span>.</p>` },
+        { label:'Create Student 1', nav:'/students', body:`
+          <div class="fields">
+            <div class="field-row"><span class="field-label">student_id</span><span class="field-value">S001</span><span class="field-note">(or auto-generate)</span></div>
+            <div class="field-row"><span class="field-label">roll_no</span><span class="field-value">24BTCS001</span></div>
+            <div class="field-row"><span class="field-label">name</span><span class="field-value">Aarav Mehta</span></div>
+            <div class="field-row"><span class="field-label">program</span><span class="field-value">BTCSE</span></div>
+            <div class="field-row"><span class="field-label">semester</span><span class="field-value">4</span></div>
+            <div class="field-row"><span class="field-label">section</span><span class="field-value">A</span></div>
+            <div class="field-row"><span class="field-label">academic_year</span><span class="field-value">2024-2025</span></div>
+            <div class="field-row"><span class="field-label">jlu_id (login)</span><span class="field-value">JLU201</span></div>
+            <div class="field-row"><span class="field-label">password</span><span class="field-value">student123</span></div>
+          </div>` },
+        { label:'Create 2–3 more students', nav:'/students', body:`<p>Repeat for:</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">S002</span><span class="field-value">Priya Nair · 24BTCS002 · Sem 4 · Section A</span></div>
+            <div class="field-row"><span class="field-label">S003</span><span class="field-value">Rohan Das · 24BTCS003 · Sem 4 · Section B</span></div>
+            <div class="field-row"><span class="field-label">S004</span><span class="field-value">Sneha Patil · 24BTCS004 · Sem 4 · Section A</span></div>
+          </div>
+          <div class="callout callout-tip">💡 Each student gets their own JLU ID (JLU202, JLU203, JLU204) and password.</div>` }
+      ]
+    },
+  ]},
+  { id:'courses', label:'Course Creation', role:'admin', steps:[
+    { id:'course-core', title:'Create a Core Course', subtitle:'Data Structures & Algorithms — the bread and butter', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Go to Courses', nav:'/courses', body:`<p>Click <span class="tag tag-page">Courses</span> in the sidebar. Then <span class="tag tag-click">+ Create Course</span> (or navigate to Admin Panel if that's where course creation lives in your backend).</p>` },
+        { label:'Fill in course details', nav:'/courses', body:`
+          <div class="fields">
+            <div class="field-row"><span class="field-label">course_code</span><span class="field-value">CS401</span></div>
+            <div class="field-row"><span class="field-label">course_name</span><span class="field-value">Data Structures & Algorithms</span></div>
+            <div class="field-row"><span class="field-label">course_type</span><span class="field-value">Core</span></div>
+            <div class="field-row"><span class="field-label">program</span><span class="field-value">BTCSE</span></div>
+            <div class="field-row"><span class="field-label">semester</span><span class="field-value">4</span></div>
+            <div class="field-row"><span class="field-label">academic_year</span><span class="field-value">2024-2025</span></div>
+            <div class="field-row"><span class="field-label">credits</span><span class="field-value">4</span></div>
+            <div class="field-row"><span class="field-label">int_weightage</span><span class="field-value">30</span></div>
+            <div class="field-row"><span class="field-label">ese_weightage</span><span class="field-value">70</span></div>
+            <div class="field-row"><span class="field-label">ese_mode</span><span class="field-value">Written</span></div>
+            <div class="field-row"><span class="field-label">ese_max_marks</span><span class="field-value">100</span></div>
+          </div>
+          <div class="callout callout-info">ℹ int_weightage + ese_weightage must equal 100.</div>` }
+      ]
+    },
+    { id:'course-oe', title:'Create an Open Elective', subtitle:'Something outside the department — demonstrates OE type', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Create an Open Elective course', nav:'/courses', body:`
+          <div class="fields">
+            <div class="field-row"><span class="field-label">course_code</span><span class="field-value">OE401</span></div>
+            <div class="field-row"><span class="field-label">course_name</span><span class="field-value">Introduction to Entrepreneurship</span></div>
+            <div class="field-row"><span class="field-label">course_type</span><span class="field-value">OE</span></div>
+            <div class="field-row"><span class="field-label">credits</span><span class="field-value">3</span></div>
+            <div class="field-row"><span class="field-label">int_weightage</span><span class="field-value">50</span></div>
+            <div class="field-row"><span class="field-label">ese_weightage</span><span class="field-value">50</span></div>
+            <div class="field-row"><span class="field-label">ese_mode</span><span class="field-value">Viva Voce</span></div>
+          </div>
+          <div class="callout callout-tip">💡 Open Electives (OE) and Ability Enhancement Compulsory Courses (AECC) demonstrate the system handles non-Core courses with different weightages and ESE modes.</div>` }
+      ]
+    },
+    { id:'assign-faculty', title:'Assign Faculty to Course', subtitle:'Creating the Faculty-Of relationship', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Go to Admin Panel → Faculty-Of tab', nav:'/admin', body:`<p>This is where you link a faculty member to a course. Click <span class="tag tag-click">+ Assign</span>.</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">faculty</span><span class="field-value">F001 — Dr. Meena Gupta</span></div>
+            <div class="field-row"><span class="field-label">course</span><span class="field-value">CS401</span></div>
+          </div>
+          <p>Repeat to assign her to OE401 as well.</p>
+          <div class="callout callout-expect">✦ Once assigned, Dr. Gupta can see CS401 and OE401 in her sidebar when she logs in. Without this assignment, the courses won't appear for her at all.</div>` }
+      ]
+    },
+    { id:'enrol-students', title:'Enrol Students in Courses', subtitle:'Connecting students to the courses they study', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Open CS401 → Enrolments tab', nav:'/courses/CS401', body:`<p>Click <span class="tag tag-page">Courses</span> → <span class="tag tag-click">Open</span> on CS401 → click the <strong>⊕ Enrolments</strong> tab.</p>` },
+        { label:'Batch enrol all 4 students', nav:'/courses/CS401', body:`<p>Click <span class="tag tag-click">+ Batch Enrol</span>. Enter student IDs:</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">student_ids</span><span class="field-value">S001, S002, S003, S004</span></div>
+            <div class="field-row"><span class="field-label">academic_year</span><span class="field-value">2024-2025</span></div>
+          </div>
+          <div class="callout callout-tip">💡 You can also use the API: <code>POST /enrolments/batch_enrol/</code> with a list. But the UI batch enrol is faster for demos.</div>` },
+        { label:'Enrol students in OE401 too', nav:'/courses/OE401', body:`<p>Navigate to OE401 → Enrolments tab → Batch enrol S001, S002, S003 (not S004 — she's not taking this elective). This shows the system supports different enrolments per student.</p>` }
+      ]
+    },
+    { id:'ia-components', title:'Add IA Components to CS401', subtitle:'Define what the internal assessment is made of', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Open CS401 → Overview tab → Add IA Components', nav:'/courses/CS401', body:`<p>Click <strong>▣ Overview</strong> tab → scroll to IA Components → <span class="tag tag-click">+ Add Component</span>.</p>
+          <p>Add three components:</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">Component 1</span><span class="field-value">Quiz 1 · max_marks: 20 · weightage: 10%</span></div>
+            <div class="field-row"><span class="field-label">Component 2</span><span class="field-value">Mid Term · max_marks: 50 · weightage: 15%</span></div>
+            <div class="field-row"><span class="field-label">Component 3</span><span class="field-value">Assignment · max_marks: 20 · weightage: 5%</span></div>
+          </div>
+          <div class="callout callout-info">ℹ Total IA weightage across components = 30%, matching the course's int_weightage. The backend scales each component's marks proportionally.</div>` }
+      ]
+    },
+  ]},
+  { id:'faculty-flow', label:'Faculty Workflow', role:'faculty', steps:[
+    { id:'faculty-login', title:'Login as Faculty', subtitle:"Switch to Dr. Meena Gupta's perspective", badge:'badge-faculty', badgeText:'Faculty',
+      actions:[
+        { label:'Log out of admin and log in as faculty', nav:'/login', body:`
+          <div class="creds">JLU ID: <span>JLU042</span> &nbsp;·&nbsp; Password: <span>faculty123</span></div>
+          <div class="callout callout-expect">✦ The sidebar now shows: Dashboard · My Courses · Exam Attempts · Backlogs · Analytics · Profile. No Admin Panel. No Students page. Faculty can only see their own assigned courses.</div>` },
+        { label:'Explore the faculty dashboard', nav:'/', body:`<p>The dashboard shows <strong>My Courses This Semester</strong> table. You should see CS401 and OE401 listed with:</p>
+          <ul style="margin:8px 0 8px 20px;font-size:14px;color:var(--text2)">
+            <li>Enrolled student count</li>
+            <li>Marks completion % (progress bar — currently 0%)</li>
+            <li>ESE status (pending)</li>
+          </ul>
+          <p>Click any course row in the table — it's a shortcut to open that course's detail page.</p>` }
+      ]
+    },
+    { id:'enter-ia', title:'Enter IA Marks', subtitle:'Filling in internal assessment scores for each student', badge:'badge-faculty', badgeText:'Faculty',
+      actions:[
+        { label:'Open CS401 → ◈ IA Marks tab', nav:'/courses/CS401', body:`<p>Click <span class="tag tag-page">My Courses</span> → Open CS401 → click <strong>◈ IA Marks</strong> tab.</p>
+          <p>You'll see the three components (Quiz 1, Mid Term, Assignment) as selectable buttons at the top. Select <strong>Quiz 1</strong> first.</p>` },
+        { label:'Enter Quiz 1 marks for all students', nav:'/courses/CS401', body:`<p>Each student gets a row with an input box. Enter:</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">S001 Aarav</span><span class="field-value">18</span><span class="field-note">/ 20</span></div>
+            <div class="field-row"><span class="field-label">S002 Priya</span><span class="field-value">15</span><span class="field-note">/ 20</span></div>
+            <div class="field-row"><span class="field-label">S003 Rohan</span><span class="field-value">17</span><span class="field-note">/ 20</span></div>
+            <div class="field-row"><span class="field-label">S004 Sneha</span><span class="field-value">9</span><span class="field-note">/ 20 — she's struggling</span></div>
+          </div>
+          <p>Click <span class="tag tag-click">Save All</span>. Saved entries turn green.</p>` },
+        { label:'Enter Mid Term marks', nav:'/courses/CS401', body:`<p>Switch to <strong>Mid Term</strong> component button. Enter:</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">S001 Aarav</span><span class="field-value">43</span><span class="field-note">/ 50</span></div>
+            <div class="field-row"><span class="field-label">S002 Priya</span><span class="field-value">38</span><span class="field-note">/ 50</span></div>
+            <div class="field-row"><span class="field-label">S003 Rohan</span><span class="field-value">40</span><span class="field-note">/ 50</span></div>
+            <div class="field-row"><span class="field-label">S004 Sneha</span><span class="field-value">21</span><span class="field-note">/ 50 — still struggling</span></div>
+          </div>
+          <p>Save. Then do the Assignment component (S001:19, S002:17, S003:18, S004:14).</p>
+          <div class="callout callout-tip">💡 The progress bar on the faculty dashboard will now show >0% for CS401.</div>` }
+      ]
+    },
+    { id:'enter-ese', title:'Enter ESE Marks', subtitle:'End semester exam results', badge:'badge-faculty', badgeText:'Faculty',
+      actions:[
+        { label:'Go to ⊡ ESE Marks tab', nav:'/courses/CS401', body:`<p>Click the <strong>⊡ ESE Marks</strong> tab. You'll see result sheet rows, one per enrolled student.</p>` },
+        { label:'Enter ESE marks', nav:'/courses/CS401', body:`<p>Enter end-semester marks (out of 100):</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">S001 Aarav</span><span class="field-value">88</span></div>
+            <div class="field-row"><span class="field-label">S002 Priya</span><span class="field-value">76</span></div>
+            <div class="field-row"><span class="field-label">S003 Rohan</span><span class="field-value">72</span></div>
+            <div class="field-row"><span class="field-label">S004 Sneha</span><span class="field-value">29</span><span class="field-note">— below passing threshold</span></div>
+          </div>
+          <p>Click <span class="tag tag-click">Save ESE Marks</span> for each, or use the bulk save if available.</p>` }
+      ]
+    },
+    { id:'compute-results', title:'Compute Results', subtitle:'Let the backend crunch grand totals and grades', badge:'badge-faculty', badgeText:'Faculty',
+      actions:[
+        { label:'Go to ◎ Results tab → click Compute All', nav:'/courses/CS401', body:`<p>Click <strong>◎ Results</strong> tab. Hit <span class="tag tag-click">◎ Compute All</span>.</p>
+          <p>The backend calculates: <code>grand_total = (IA_marks × 0.30) + (ESE × 0.70)</code></p>
+          <div class="callout callout-expect">✦ Expected results after compute:<br>
+          S001: IA≈28 + ESE≈61.6 = <strong>~89.6 → A+</strong><br>
+          S002: IA≈22 + ESE≈53.2 = <strong>~75.4 → A</strong><br>
+          S003: IA≈23 + ESE≈50.4 = <strong>~73.5 → A</strong><br>
+          S004: IA≈13 + ESE≈20.3 = <strong>~33.6 → F ← FAIL</strong>
+          </div>
+          <div class="callout callout-warn">⚠ Sneha's grand total is under 40 (the C grade threshold), so she fails. The system should mark her pass_status = Fail, which will trigger a Backlog automatically.</div>` },
+        { label:'Set pass/fail statuses', nav:'/courses/CS401', body:`<p>In the Results tab, you can now set the status for each student. Set S004 to <strong>Fail</strong>. Set the others to <strong>Pass</strong>.</p>
+          <p>Saving <strong>Fail</strong> for S004 should automatically create a Backlog record for her in CS401.</p>` }
+      ]
+    },
+    { id:'submit-course', title:'Submit Course to Admin', subtitle:'Lock the marks once you\'re satisfied', badge:'badge-faculty', badgeText:'Faculty',
+      actions:[
+        { label:'Click ⇪ Submit to Admin button', nav:'/courses/CS401', body:`<p>In the course detail header, click <span class="tag tag-click">⇪ Submit to Admin</span>. A confirmation dialog appears.</p>
+          <div class="callout callout-expect">✦ After submit: the badge changes from <em>Draft Mode</em> to <strong>✓ Submitted & Locked</strong>. All mark input fields become read-only. The faculty cannot edit anymore.</div>
+          <div class="callout callout-tip">💡 This is intentional — it forces a review cycle. If the admin finds an error, they unlock the course from the Admin Panel.</div>` }
+      ]
+    },
+    { id:'exam-register', title:'Register Students for Exam Sitting', subtitle:'Scheduling who appears for the ESE', badge:'badge-faculty', badgeText:'Faculty',
+      actions:[
+        { label:'Go to Exam Attempts → Register Students tab', nav:'/exam-attempts', body:`<p>Click <span class="tag tag-page">Exam Attempts</span> in the sidebar. Click the <strong>Register Students</strong> tab.</p>` },
+        { label:'Load enrolled students for CS401', nav:'/exam-attempts', body:`
+          <div class="fields">
+            <div class="field-row"><span class="field-label">Course Code</span><span class="field-value">CS401</span></div>
+            <div class="field-row"><span class="field-label">Attempt Type</span><span class="field-value">Regular</span></div>
+            <div class="field-row"><span class="field-label">Academic Year</span><span class="field-value">2024-2025</span></div>
+            <div class="field-row"><span class="field-label">Exam Date</span><span class="field-value">2025-04-20</span></div>
+          </div>
+          <p>Click <span class="tag tag-click">↓ Load Enrolled Students</span>. This hits <code>/ccr/CS401/enrolled_students/</code> and populates the student IDs textarea automatically.</p>
+          <div class="callout callout-info">ℹ This is the step that confused you earlier — it's NOT re-enrolling them in the course. It's scheduling a specific exam sitting. Different record, different table.</div>` },
+        { label:'Click Register Students', nav:'/exam-attempts', body:`<p>Hit <span class="tag tag-click">Register Students</span>. The backend creates ExamAttempt records for all 4 students with status <strong>Scheduled</strong>.</p>
+          <div class="callout callout-expect">✦ Switch to the View Attempts tab. Filter by CS401 + Regular. You'll see all 4 students listed as Scheduled with no marks yet.</div>` }
+      ]
+    },
+    { id:'enter-results', title:'Enter Exam Results', subtitle:'Post-exam: record what happened for each student', badge:'badge-faculty', badgeText:'Faculty',
+      actions:[
+        { label:'Go to Enter Results tab', nav:'/exam-attempts', body:`<p>Click the <strong>Enter Results</strong> tab. This is a bulk entry grid — add one row per result.</p>` },
+        { label:'Add result rows', nav:'/exam-attempts', body:`<p>Click <span class="tag tag-click">+ Add Row</span> four times. Fill each row:</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">S001 · CS401 · Regular · #1</span><span class="field-value">marks: 88 · status: Pass</span></div>
+            <div class="field-row"><span class="field-label">S002 · CS401 · Regular · #1</span><span class="field-value">marks: 76 · status: Pass</span></div>
+            <div class="field-row"><span class="field-label">S003 · CS401 · Regular · #1</span><span class="field-value">marks: 72 · status: Pass</span></div>
+            <div class="field-row"><span class="field-label">S004 · CS401 · Regular · #1</span><span class="field-value">marks: 29 · status: Fail</span></div>
+          </div>
+          <p>Click <span class="tag tag-click">Save Results</span>.</p>
+          <div class="callout callout-expect">✦ S004's Fail triggers an automatic Backlog creation. Navigate to <span class="tag tag-page">Backlogs</span> — you should see S004 · CS401 · Reason: Failed · Status: Active.</div>` }
+      ]
+    },
+  ]},
+  { id:'backlog-flow', label:'Backlog Management', role:'admin', steps:[
+    { id:'view-backlogs', title:'View & Manage Backlogs', subtitle:'Back as admin — see what needs clearing', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Log back in as admin, go to Backlogs', nav:'/backlogs', body:`<p>Click <span class="tag tag-page">Backlogs</span>. Filter by Status = <strong>Active</strong>.</p>
+          <div class="callout callout-expect">✦ You should see: S004 · CS401 · Reason: Failed · Status: Active · Origin: #1 Regular. This backlog was auto-created when we entered Fail for S004.</div>` },
+        { label:'Schedule S004 for a Backlog attempt', nav:'/exam-attempts', body:`<p>Go to <span class="tag tag-page">Exam Attempts</span> → Register Students tab.</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">Course Code</span><span class="field-value">CS401</span></div>
+            <div class="field-row"><span class="field-label">Attempt Type</span><span class="field-value">Backlog</span></div>
+            <div class="field-row"><span class="field-label">Student IDs</span><span class="field-value">S004</span><span class="field-note">(type manually, she's the only one)</span></div>
+          </div>
+          <p>Register. This creates a new ExamAttempt for S004 with type = Backlog, attempt_no = 2, status = Scheduled.</p>` },
+        { label:'Enter S004\'s backlog result', nav:'/exam-attempts', body:`<p>Enter Results tab → add a row:</p>
+          <div class="fields">
+            <div class="field-row"><span class="field-label">S004 · CS401 · Backlog · #2</span><span class="field-value">marks: 61 · status: Pass</span></div>
+          </div>
+          <p>Save. The system sees Pass → finds S004's active backlog in CS401 → automatically sets it to <strong>Cleared</strong>, linking this attempt as the clearing_attempt.</p>
+          <div class="callout callout-expect">✦ Go back to Backlogs. S004's CS401 entry is now Status: Cleared · Cleared By: #2 (61 marks). The backlog loop is complete.</div>` }
+      ]
+    },
+    { id:'manual-clear', title:'Manual Backlog Clear & Lapse', subtitle:'Admin override capabilities', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Try manually clearing a backlog', nav:'/backlogs', body:`<p>If there's still an active backlog, click <span class="tag tag-click">✓ Clear</span> on it. A modal appears asking for an optional Clearing Attempt ID.</p>
+          <p>Leave it blank and confirm. This is a manual override — used when a student reappears under special circumstances without a formal attempt record.</p>
+          <div class="callout callout-warn">⚠ The modal note says "This is a manual override. Backlogs are normally cleared automatically when a student passes." — good to point out in your demo.</div>` },
+        { label:'Try marking a backlog as Lapsed', nav:'/backlogs', body:`<p>Click <span class="tag tag-click">Lapse</span> on a backlog. A confirmation alert appears. Confirm it.</p>
+          <p>Status changes to <strong>Lapsed</strong>. This means the student has used up all their allowed attempts. Used when university policy says no more retakes.</p>` }
+      ]
+    },
+  ]},
+  { id:'student-flow', label:'Student View', role:'student', steps:[
+    { id:'student-login', title:'Login as Student S001', subtitle:'See what the student sees after all that work', badge:'badge-student', badgeText:'Student',
+      actions:[
+        { label:'Log out, log in as S001 Aarav Mehta', nav:'/login', body:`
+          <div class="creds">JLU ID: <span>JLU201</span> &nbsp;·&nbsp; Password: <span>student123</span></div>
+          <div class="callout callout-expect">✦ The sidebar is dramatically simpler: Dashboard · My Results · My Backlogs · Profile. No admin tools, no other students' data.</div>` },
+        { label:'Read the student dashboard', nav:'/', body:`<p>The dashboard shows stat cards: Program, Semester, Course count, Avg Score (SGPA approx), Active Backlogs.</p>
+          <p>Below is a results table with all his courses — IA total, ESE, grand total, grade, pass status. Click any row to see a quick detail modal.</p>
+          <div class="callout callout-expect">✦ S001 Aarav should show A+ in CS401 with grand total ~89.6. No active backlogs — all green.</div>` }
+      ]
+    },
+    { id:'student-backlogs', title:'Check Backlogs as Student', subtitle:'Now log in as the failing student to show the alert', badge:'badge-student', badgeText:'Student',
+      actions:[
+        { label:'Log out, log in as S004 Sneha Patil', nav:'/login', body:`
+          <div class="creds">JLU ID: <span>JLU204</span> &nbsp;·&nbsp; Password: <span>student123</span></div>` },
+        { label:'See the backlog alert on dashboard', nav:'/', body:`<p>The dashboard shows a red alert banner: <em>"You have 1 active backlog. View details →"</em></p>
+          <p>The Active Backlogs stat card is red with count 1 (or 0 if we already cleared it — if so, change the demo order to show this before clearing).</p>` },
+        { label:'Navigate to My Backlogs', nav:'/my-backlogs', body:`<p>Click <span class="tag tag-page">My Backlogs</span>. Sneha sees:</p>
+          <ul style="margin:8px 0 8px 20px;font-size:14px;color:var(--text2)">
+            <li>Course: CS401 · Reason: Failed · Status: Active (or Cleared if backlog session was done)</li>
+            <li>Origin Attempt: #1 Regular</li>
+            <li>Cleared By: #2 Backlog (61 marks) — if already cleared</li>
+          </ul>
+          <div class="callout callout-tip">💡 Students can see exactly which attempt caused the backlog and which attempt cleared it. Transparent audit trail for them.</div>` }
+      ]
+    },
+  ]},
+  { id:'admin-review', label:'Admin Review & Analytics', role:'admin', steps:[
+    { id:'unlock-course', title:'Unlock a Submitted Course', subtitle:'Admin can reverse a faculty submission', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Log back in as admin, open CS401', nav:'/courses/CS401', body:`<p>Navigate to <span class="tag tag-page">Courses</span> → Open CS401. Since Dr. Gupta submitted it, you'll see the <strong>🔓 Unlock Course</strong> button in the header.</p>` },
+        { label:'Click Unlock Course', nav:'/courses/CS401', body:`<p>Click <span class="tag tag-click">🔓 Unlock Course</span>. Confirmation dialog. Confirm.</p>
+          <div class="callout callout-expect">✦ Badge changes back to <em>Draft Mode</em>. Dr. Gupta can now edit marks again. This flow demonstrates the admin-faculty review cycle.</div>` }
+      ]
+    },
+    { id:'analytics-view', title:'Explore Analytics', subtitle:'System-wide performance overview', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Go to Analytics page', nav:'/analytics', body:`<p>Click <span class="tag tag-page">Analytics</span>. You'll see the dashboard summary: pass rate, avg grand total, fail count, distinction rate.</p>` },
+        { label:'Explore Course Summary and Grade Distribution', nav:'/analytics', body:`<p>The analytics page has several sections — course summaries, grade distribution charts (recharts), toppers list, IA breakdown, and individual student reports.</p>
+          <div class="callout callout-tip">💡 The toppers API endpoint is <code>/analytics/toppers/?limit=10</code>. Point this out — the system can rank students across all courses automatically.</div>` }
+      ]
+    },
+    { id:'student-report', title:'View Individual Student Report', subtitle:'Drill into one student\'s full academic picture', badge:'badge-admin', badgeText:'Admin',
+      actions:[
+        { label:'Go to Students → click View on S001', nav:'/students', body:`<p>Click <span class="tag tag-page">Students</span> → find Aarav Mehta → click <span class="tag tag-click">View →</span>.</p>
+          <p>This opens the StudentReport page at <code>/students/S001</code>. It shows all courses, marks, ESE, grand total, grade, backlog history, and exam attempt history for this student.</p>
+          <div class="callout callout-expect">✦ Same page as the student's <em>My Results</em> — but an admin can view it for any student.</div>` }
+      ]
+    },
+  ]},
+];
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+let done = {};
+let currentStep = null;
+let allSteps = [];
+
+PHASES.forEach(ph => ph.steps.forEach(st => allSteps.push(st.id)));
+
+function totalActions() {
+  let n = 0;
+  PHASES.forEach(ph => ph.steps.forEach(st => n += st.actions.length));
+  return n;
+}
+function doneCount() { return Object.keys(done).filter(k => done[k]).length; }
+
+// ══════════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════════
+function buildNav() {
+  let globalStep = 0;
+  const tree = document.getElementById('nav-tree');
+  tree.innerHTML = PHASES.map(ph => {
+    const stepsHtml = ph.steps.map(st => {
+      globalStep++;
+      const isDone = st.actions.every((a,i) => done[`${st.id}-${i}`]);
+      return `<div class="step-link ${isDone?'done':''}" id="nav-${st.id}" onclick="goStep('${st.id}')">
+        <div class="step-num">${isDone ? '✓' : globalStep}</div>
+        <div class="step-text">${st.title}</div>
+      </div>`;
+    }).join('');
+    const isOpen = ph.steps.some(st => st.id === currentStep);
+    return `<div class="phase-group">
+      <div class="phase-header ${isOpen?'open':''}" onclick="togglePhase(this)">
+        <span>${ph.label}</span><span class="phase-chevron">›</span>
+      </div>
+      <div class="phase-steps" style="display:${isOpen?'block':'none'}">${stepsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function togglePhase(el) {
+  el.classList.toggle('open');
+  const steps = el.nextElementSibling;
+  steps.style.display = steps.style.display === 'none' ? 'block' : 'none';
+}
+
+function updateProgress() {
+  const total = totalActions();
+  const done_n = doneCount();
+  const pct = Math.round(done_n / total * 100);
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = `${done_n} / ${total} steps done`;
+}
+
+function goStep(stepId) {
+  currentStep = stepId;
+  // Find step
+  let step = null, phaseId = null;
+  PHASES.forEach(ph => { const s = ph.steps.find(s=>s.id===stepId); if(s){step=s; phaseId=ph.id;} });
+  if (!step) return;
+
+  // Expand correct phase
+  document.querySelectorAll('.phase-steps').forEach(ps => ps.style.display = 'none');
+  document.querySelectorAll('.phase-header').forEach(ph => ph.classList.remove('open'));
+  const group = document.getElementById('nav-'+stepId)?.closest('.phase-group');
+  if (group) {
+    group.querySelector('.phase-steps').style.display = 'block';
+    group.querySelector('.phase-header').classList.add('open');
+  }
+  document.querySelectorAll('.step-link').forEach(l => l.classList.remove('active'));
+  const navEl = document.getElementById('nav-'+stepId);
+  if (navEl) navEl.classList.add('active');
+
+  // Find prev/next
+  const idx = allSteps.indexOf(stepId);
+  const prevId = idx > 0 ? allSteps[idx-1] : null;
+  const nextId = idx < allSteps.length-1 ? allSteps[idx+1] : null;
+
+  const actionsHtml = step.actions.map((a, i) => {
+    const key = `${stepId}-${i}`;
+    const checked = done[key];
+    return `<div class="action-card" id="ac-${stepId}-${i}">
+      <div class="action-header" onclick="toggleAction('${stepId}',${i})">
+        <div class="action-checkbox ${checked?'checked':''}" onclick="toggleDone(event,'${stepId}',${i})"></div>
+        <div class="action-label">${a.label}</div>
+        ${a.nav ? `<span class="action-nav">${a.nav}</span>` : ''}
+      </div>
+      <div class="action-body ${i===0&&!checked?'open':''}" id="ab-${stepId}-${i}">
+        ${a.body}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="phase-badge ${step.badge}">
+      <span>${step.badge==='badge-admin'?'🔐':step.badge==='badge-faculty'?'📋':'🎓'}</span>
+      ${step.badgeText}
+    </div>
+    <div class="step-title">${step.title}</div>
+    <div class="step-subtitle">${step.subtitle}</div>
+    ${actionsHtml}
+    <div class="nav-row">
+      <div>
+        ${prevId ? `<button class="nav-btn" onclick="goStep('${prevId}')">← Previous</button>` : '<span></span>'}
+      </div>
+      <div class="step-counter">${idx+1} / ${allSteps.length}</div>
+      <div>
+        ${nextId ? `<button class="nav-btn primary" onclick="goStep('${nextId}')">Next →</button>` : `<button class="nav-btn primary" onclick="showFinish()">Finish 🎉</button>`}
+      </div>
+    </div>`;
+
+  window.scrollTo(0,0);
+  buildNav();
+}
+
+function toggleAction(stepId, i) {
+  const body = document.getElementById(`ab-${stepId}-${i}`);
+  body.classList.toggle('open');
+}
+
+function toggleDone(event, stepId, i) {
+  event.stopPropagation();
+  const key = `${stepId}-${i}`;
+  done[key] = !done[key];
+  const checkbox = document.querySelector(`#ac-${stepId}-${i} .action-checkbox`);
+  checkbox.classList.toggle('checked', done[key]);
+
+  // Auto-open next action
+  if (done[key]) {
+    const nextBody = document.getElementById(`ab-${stepId}-${i+1}`);
+    if (nextBody) { nextBody.classList.add('open'); }
+    // Close current
+    document.getElementById(`ab-${stepId}-${i}`).classList.remove('open');
+  }
+
+  // Update nav done state
+  const step = allSteps.includes(stepId) ? PHASES.flatMap(p=>p.steps).find(s=>s.id===stepId) : null;
+  const navEl = document.getElementById('nav-'+stepId);
+  if (step && navEl) {
+    const allDone = step.actions.every((_,idx) => done[`${stepId}-${idx}`]);
+    navEl.classList.toggle('done', allDone);
+    navEl.querySelector('.step-num').textContent = allDone ? '✓' : (allSteps.indexOf(stepId)+1).toString();
+  }
+  updateProgress();
+}
+
+function showFinish() {
+  document.getElementById('main-content').innerHTML = `
+    <div class="finish">
+      <div class="finish-emoji">🎓</div>
+      <div class="finish-title">Walkthrough Complete</div>
+      <p class="finish-desc" style="margin-top:12px">You've covered the full JLU Marks lifecycle — from org setup and course creation through faculty mark entry, result computation, backlog management, and the student view.</p>
+      <div style="margin-top:32px;display:flex;gap:12px;justify-content:center">
+        <button class="nav-btn primary" onclick="goStep(allSteps[0])">Start Over</button>
+        <button class="nav-btn" onclick="goStep(allSteps[allSteps.length-2])">← Back</button>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+buildNav();
+goStep(allSteps[0]);
+updateProgress();
+</script>
+</body>
+</html>

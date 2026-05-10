@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+
+  db:
+    image: postgres:16-alpine
+    container_name: jlu_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${DB_NAME:-jlu_marks_db}
+      POSTGRES_USER:     ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: jlu_web
+    restart: unless-stopped
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      SECRET_KEY:      ${SECRET_KEY:-dev-secret-key-change-in-prod}
+      DEBUG:           ${DEBUG:-True}
+      ALLOWED_HOSTS:   ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DB_NAME:         ${DB_NAME:-jlu_marks_db}
+      DB_USER:         ${DB_USER:-postgres}
+      DB_PASSWORD:     ${DB_PASSWORD:-postgres}
+      DB_HOST:         db
+      DB_PORT:         5432
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── Optional pgAdmin (comment out if not needed) ────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: jlu_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL:    admin@jlu.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    profiles:
+      - debug   # only started with: docker compose --profile debug up
+
+volumes:
+  postgres_data:
